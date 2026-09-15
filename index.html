@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>できた！タッチワールド 〜自立活動サポートゲーム〜</title>
+  <style>
+    :root {
+      --bg-color: #f0f7ff;
+      --card-bg: #ffffff;
+      --text-main: #2d3748;
+      --text-sub: #4a5568;
+      --primary: #3b82f6;
+      --primary-light: #dbeafe;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --accent-orange: #f59e0b;
+      --accent-pink: #ec4899;
+      --border-radius-lg: 24px;
+      --border-radius-md: 16px;
+      --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      --font-family: "Hiragino Maru Gothic ProN", "BIZ UDPGothic", "Hiragino Sans", "Meiryo", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ヘッダー */
+    header {
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .app-title-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: white;
+      font-size: 24px;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+    }
+
+    .title-texts h1 {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #1e3a8a;
+      letter-spacing: 0.03em;
+    }
+
+    .title-texts .ruby {
+      font-size: 0.75rem;
+      color: #64748b;
+      display: block;
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-header {
+      background: #f1f5f9;
+      border: 2px solid #e2e8f0;
+      padding: 8px 14px;
+      border-radius: 9999px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-header:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-header:active {
+      transform: scale(0.96);
+    }
+
+    /* メインコンテナ */
+    main {
+      flex: 1;
+      max-width: 1000px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ナビゲーションタブ（ゲーム選択） */
+    .menu-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      background: white;
+      border: 3px solid #e2e8f0;
+      border-radius: var(--border-radius-md);
+      padding: 12px 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+    }
+
+    .tab-btn:hover {
+      border-color: #93c5fd;
+      transform: translateY(-2px);
+    }
+
+    .tab-btn.active {
+      background: #eff6ff;
+      border-color: var(--primary);
+      box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .tab-btn .tab-icon {
+      font-size: 32px;
+      line-height: 1;
+    }
+
+    .tab-btn .tab-label {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--text-main);
+      text-align: center;
+    }
+
+    .tab-btn .tab-sub {
+      font-size: 0.7rem;
+      color: #64748b;
+      white-space: nowrap;
+    }
+
+    /* ゲーム画面エリア */
+    .game-area {
+      flex: 1;
+      background: var(--card-bg);
+      border-radius: var(--border-radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      min-height: 480px;
+      overflow: hidden;
+      border: 3px solid #f1f5f9;
+    }
+
+    /* 共通プロンプト・問いかけバー */
+    .prompt-box {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: var(--border-radius-md);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .prompt-content {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .prompt-badge {
+      background: var(--primary);
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      flex-shrink: 0;
+    }
+
+    .prompt-text {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #1e293b;
+      line-height: 1.3;
+    }
+
+    .btn-speak {
+      background: #e0e7ff;
+      border: 2px solid #c7d2fe;
+      color: #4338ca;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .btn-speak:active {
+      transform: scale(0.9);
+      background: #c7d2fe;
+    }
+
+    /* ゲーム1: きもちどーれだ & ゲーム2: なかまわけ の選択カードグリッド */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      flex: 1;
+      align-items: center;
+    }
+
+    @media (min-width: 680px) {
+      .cards-grid.cols-4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .choice-card {
+      background: #ffffff;
+      border: 4px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 20px 10px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.04);
+      outline: none;
+    }
+
+    .choice-card:hover {
+      border-color: #60a5fa;
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 10px 20px rgba(96, 165, 250, 0.15);
+    }
+
+    .choice-card:active {
+      transform: scale(0.95);
+    }
+
+    .choice-card .card-emoji {
+      font-size: 64px;
+      line-height: 1;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    }
+
+    .choice-card .card-text {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #334155;
+      text-align: center;
+    }
+
+    /* 正解・不正解時のアニメーション */
+    .choice-card.correct-anim {
+      background-color: #ecfdf5 !important;
+      border-color: #10b981 !important;
+      animation: bounce 0.6s ease;
+    }
+
+    .choice-card.wrong-anim {
+      background-color: #fef2f2 !important;
+      border-color: #fca5a5 !important;
+      animation: wobble 0.5s ease;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* ゲーム3: ゆっくりタッチ（キャンバス・浮遊オブジェクト） */
+    .balloon-stage {
+      flex: 1;
+      position: relative;
+      background: linear-gradient(180deg, #e0f2fe 0%, #f0fdf4 100%);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+      min-height: 360px;
+      border: 3px dashed #bae6fd;
+    }
+
+    .floating-item {
+      position: absolute;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s linear;
+      will-change: transform, left, top;
+    }
+
+    .floating-item-inner {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 44px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+      border: 3px solid white;
+      animation: floatBreath 2s infinite alternate ease-in-out;
+    }
+
+    @keyframes floatBreath {
+      0% { transform: scale(0.95); }
+      100% { transform: scale(1.05); }
+    }
+
+    .balloon-counter {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #0369a1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      pointer-events: none;
+    }
+
+    .speed-selector {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-speed {
+      background: white;
+      border: 2px solid #bae6fd;
+      color: #0284c7;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-speed.active {
+      background: #0284c7;
+      color: white;
+    }
+
+    /* ゲーム4: じゅんばんタッチ 1・2・3 */
+    .sequence-stage {
+      flex: 1;
+      position: relative;
+      background: #fdf4ff;
+      border-radius: var(--border-radius-md);
+      min-height: 360px;
+      border: 3px dashed #f5d0fe;
+    }
+
+    .seq-node {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: white;
+      border: 5px solid #d946ef;
+      color: #86198f;
+      font-size: 40px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(217, 70, 239, 0.25);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .seq-node:active {
+      transform: scale(0.9);
+    }
+
+    .seq-node.hint-next {
+      animation: pulseGlow 1.2s infinite ease-in-out;
+      border-color: #f59e0b;
+      color: #b45309;
+    }
+
+    .seq-node.cleared {
+      background: #10b981;
+      border-color: #059669;
+      color: white;
+      transform: scale(0.85);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
+      }
+      50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 16px rgba(245, 158, 11, 0);
+      }
+    }
+
+    /* 花丸・成功フィードバックオーバーレイ */
+    .success-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .success-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .hanamaru-icon {
+      width: 140px;
+      height: 140px;
+      animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .success-msg {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #e11d48;
+      margin-top: 16px;
+      animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .success-sub {
+      font-size: 1.2rem;
+      color: #475569;
+      margin-top: 8px;
+    }
+
+    .btn-next-round {
+      margin-top: 20px;
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 14px 36px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      border-radius: 9999px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+      transition: all 0.15s ease;
+    }
+
+    .btn-next-round:hover {
+      background: #059669;
+      transform: scale(1.05);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.3); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* 紙吹雪キャンバス */
+    #confettiCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 45;
+    }
+
+    /* モーダルダイアログ */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-window {
+      background: white;
+      border-radius: 24px;
+      max-width: 540px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      transform: scale(0.95);
+      transition: transform 0.2s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-backdrop.open .modal-window {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 12px;
+    }
+
+    .modal-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    .btn-close-modal {
+      background: #f1f5f9;
+      border: none;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .setting-label {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #334155;
+    }
+
+    .setting-desc {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    /* トグルスイッチ */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 56px;
+      height: 32px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: .25s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 24px;
+      width: 24px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .25s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    /* ガイドボックス（自立活動のねらい） */
+    .guide-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: #166534;
+      line-height: 1.5;
+    }
+
+    .guide-box strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #14532d;
+    }
+
+    /* レスポンシブ調整 */
+    @media (max-width: 600px) {
+      .menu-tabs {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .prompt-text {
+        font-size: 1.15rem;
+      }
+      .choice-card {
+        padding: 14px 6px;
+        min-height: 110px;
+      }
+      .choice-card .card-emoji {
+        font-size: 48px;
+      }
+      .choice-card .card-text {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header>
+    <div class="app-title-area">
+      <div class="logo-badge" aria-hidden="true">★</div>
+      <div class="title-texts">
+        <span class="ruby">じりつかつどう サポート</span>
+        <h1>できた！タッチワールド</h1>
+      </div>
+    </div>
+    <div class="header-controls">
+      <button id="btnSettings" class="btn-header" aria-label="せってい">
+        ⚙️ <span>せってい</span>
+      </button>
+      <button id="btnFullscreen" class="btn-header" aria-label="ぜんめんひょうじ">
+        ⛶ <span>ぜんめん</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main>
+    <!-- ゲーム選択タブ -->
+    <nav class="menu-tabs" role="tablist">
+      <button class="tab-btn active" data-game="emotion" role="tab" aria-selected="true">
+        <span class="tab-icon">😊</span>
+        <span class="tab-label">きもち</span>
+        <span class="tab-sub">こころの安定</span>
+      </button>
+      <button class="tab-btn" data-game="category" role="tab" aria-selected="false">
+        <span class="tab-icon">🧺</span>
+        <span class="tab-label">なかまわけ</span>
+        <span class="tab-sub">かんきょうの把握</span>
+      </button>
+      <button class="tab-btn" data-game="balloon" role="tab" aria-selected="false">
+        <span class="tab-icon">🎈</span>
+        <span class="tab-label">ゆっくりタッチ</span>
+        <span class="tab-sub">からだ・ゆびの動き</span>
+      </button>
+      <button class="tab-btn" data-game="sequence" role="tab" aria-selected="false">
+        <span class="tab-icon">🔢</span>
+        <span class="tab-label">1・2・3</span>
+        <span class="tab-sub">みとおし・じゅんばん</span>
+      </button>
+    </nav>
+
+    <!-- ゲームプレイエリア -->
+    <section class="game-area" id="gameArea">
+      <!-- 問いかけボックス -->
+      <div class="prompt-box" id="promptBox">
+        <div class="prompt-content">
+          <span class="prompt-badge" id="promptBadge">もんだい</span>
+          <p class="prompt-text" id="promptText">読み込み中...</p>
+        </div>
+        <button class="btn-speak" id="btnSpeakPrompt" title="もういちど きく">
+          🔊
+        </button>
+      </div>
+
+      <!-- ゲームビューコンテナ -->
+      <div id="gameContent" style="flex: 1; display: flex; flex-direction: column;">
+        <!-- 動的にコンテンツが注入されます -->
+      </div>
+
+      <!-- 成功フィードバック・花丸オーバーレイ -->
+      <div class="success-overlay" id="successOverlay">
+        <svg class="hanamaru-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 華やかな二重花丸 SVG -->
+          <circle cx="50" cy="50" r="38" stroke="#ef4444" stroke-width="7" stroke-dasharray="6 4" />
+          <circle cx="50" cy="50" r="28" stroke="#f59e0b" stroke-width="6" />
+          <path d="M35 50 L46 62 L66 38" stroke="#10b981" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <h2 class="success-msg" id="successMsg">できた！！</h2>
+        <p class="success-sub" id="successSub">とってもじょうずだね！</p>
+        <button class="btn-next-round" id="btnNextRound">つぎへ すすむ ➔</button>
+      </div>
+
+      <!-- 紙吹雪用キャンバス -->
+      <canvas id="confettiCanvas"></canvas>
+    </section>
+  </main>
+
+  <!-- 設定モーダル -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h2 class="modal-title">⚙️ せってい・使い方</h2>
+        <button class="btn-close-modal" id="btnCloseSettings">✕</button>
+      </div>
+
+      <div class="setting-item">
+        <div>
+          <div class="setting-label">おと（効果音）</div>
+          <div class="setting-desc">ピンポンやファンファーレを鳴らします</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleSound" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div>
+          <div class="setting-label">おんせいよみあげ</div>
+          <div class="setting-desc">もんだいや言葉を自動で声に出して読みます</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleVoice" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div>
+          <div class="setting-label">つぎのヒント（じゅんばんタッチ）</div>
+          <div class="setting-desc">次に押す数字をやさしく光らせます</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleHint" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="guide-box">
+        <strong>🏫 特別支援学校での自立活動のねらい：</strong>
+        ・「きもち」：表情と感情の一致、自分の感情の表出・理解（心理的な安定・コミュニケーション）<br>
+        ・「なかまわけ」：身の回りの物の概念・用途の弁別（環境の把握・認知）<br>
+        ・「ゆっくりタッチ」：目と手の協応運動、注視、指先のコントロール（身体の動き）<br>
+        ・「1・2・3」：見通しを持った行動、系列順序の理解（環境の把握・見通し）
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================
+       できた！タッチワールド (MVP) - ゲームスクリプト
+       ========================================================== */
+
+    // --- 音声シンセサイザー (Web Audio API) ---
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playTone(freq, type = 'sine', duration = 0.2, startOffset = 0, gainVal = 0.15) {
+        if (!this.enabled) return;
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime + startOffset);
+
+        gain.gain.setValueAtTime(gainVal, this.ctx.currentTime + startOffset);
+        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + startOffset + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(this.ctx.currentTime + startOffset);
+        osc.stop(this.ctx.currentTime + startOffset + duration);
+      }
+
+      playCorrect() {
+        // ピンポン♪（2音の明るいチャイム）
+        this.playTone(523.25, 'sine', 0.18, 0, 0.2);     // C5
+        this.playTone(659.25, 'sine', 0.35, 0.12, 0.25); // E5
+      }
+
+      playTryAgain() {
+        // やさしい低音ポロン（否定的なブザー音ではなく、再挑戦を促す柔らかい音）
+        this.playTone(392.00, 'triangle', 0.25, 0, 0.15); // G4
+      }
+
+      playPop() {
+        // バルーン割り（ポコン！）
+        this.playTone(600, 'sine', 0.08, 0, 0.25);
+        this.playTone(300, 'triangle', 0.1, 0.04, 0.15);
+      }
+
+      playStep() {
+        // 順番タッチ時の小気味よいピ音
+        this.playTone(880, 'sine', 0.12, 0, 0.2); // A5
+      }
+
+      playFanfare() {
+        // できた！のファンファーレ
+        const notes = [
+          { f: 523.25, d: 0.12, o: 0 },    // C5
+          { f: 659.25, d: 0.12, o: 0.12 }, // E5
+          { f: 783.99, d: 0.12, o: 0.24 }, // G5
+          { f: 1046.50, d: 0.45, o: 0.36 } // C6
+        ];
+        notes.forEach(n => this.playTone(n.f, 'triangle', n.d, n.o, 0.3));
+      }
+    }
+
+    // --- 音声読み上げエンジン (Web Speech API) ---
+    class VoiceEngine {
+      constructor() {
+        this.enabled = true;
+      }
+
+      speak(text) {
+        if (!this.enabled || !('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel(); // 前の音声を止める
+        const uttr = new SpeechSynthesisUtterance(text);
+        uttr.lang = 'ja-JP';
+        uttr.rate = 0.9;  // 少しゆっくり丁寧なスピード
+        uttr.pitch = 1.1; // やや高めで明るい声調
+        window.speechSynthesis.speak(uttr);
+      }
+    }
+
+    // --- 紙吹雪エフェクト (Canvas) ---
+    class ConfettiEngine {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.particles = [];
+        this.animId = null;
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+      }
+
+      resize() {
+        this.canvas.width = this.canvas.parentElement.clientWidth;
+        this.canvas.height = this.canvas.parentElement.clientHeight;
+      }
+
+      burst() {
+        this.resize();
+        this.particles = [];
+        const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6'];
+        for (let i = 0; i < 70; i++) {
+          this.particles.push({
+            x: this.canvas.width / 2,
+            y: this.canvas.height / 2,
+            vx: (Math.random() - 0.5) * 14,
+            vy: (Math.random() - 0.8) * 16,
+            size: Math.random() * 8 + 6,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: Math.random() * 360,
+            rotSpeed: (Math.random() - 0.5) * 12,
+            opacity: 1
+          });
+        }
+        if (!this.animId) {
+          this.animate();
+        }
+      }
+
+      animate() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        let active = false;
+
+        for (const p of this.particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.45; // 重力
+          p.rotation += p.rotSpeed;
+          p.opacity -= 0.012;
+
+          if (p.opacity > 0) {
+            active = true;
+            this.ctx.save();
+            this.ctx.translate(p.x, p.y);
+            this.ctx.rotate((p.rotation * Math.PI) / 180);
+            this.ctx.fillStyle = p.color;
+            this.ctx.globalAlpha = Math.max(0, p.opacity);
+            this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            this.ctx.restore();
+          }
+        }
+
+        if (active) {
+          this.animId = requestAnimationFrame(() => this.animate());
+        } else {
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+          this.animId = null;
+        }
+      }
+    }
+
+    // --- アプリケーションマネージャー ---
+    const sound = new SoundEngine();
+    const voice = new VoiceEngine();
+    const confetti = new ConfettiEngine(document.getElementById('confettiCanvas'));
+
+    let currentGameMode = 'emotion';
+    let currentNextAction = null;
+    let hintEnabled = true;
+
+    // UI要素の参照
+    const promptBadge = document.getElementById('promptBadge');
+    const promptText = document.getElementById('promptText');
+    const btnSpeakPrompt = document.getElementById('btnSpeakPrompt');
+    const gameContent = document.getElementById('gameContent');
+    const successOverlay = document.getElementById('successOverlay');
+    const successMsg = document.getElementById('successMsg');
+    const successSub = document.getElementById('successSub');
+    const btnNextRound = document.getElementById('btnNextRound');
+
+    // 問いかけ読み上げボタン
+    btnSpeakPrompt.addEventListener('click', () => {
+      sound.init();
+      voice.speak(promptText.textContent);
+    });
+
+    // 次へ進むボタン
+    btnNextRound.addEventListener('click', () => {
+      successOverlay.classList.remove('show');
+      if (typeof currentNextAction === 'function') {
+        currentNextAction();
+      }
+    });
+
+    // タブ切り替え
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        sound.init();
+        tabs.forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        successOverlay.classList.remove('show');
+
+        currentGameMode = tab.dataset.game;
+        startCurrentGame();
+      });
+    });
+
+    function setPrompt(badge, text) {
+      promptBadge.textContent = badge;
+      promptText.textContent = text;
+      voice.speak(text);
+    }
+
+    function showSuccess(title, sub, nextCallback) {
+      sound.playFanfare();
+      confetti.burst();
+      successMsg.textContent = title;
+      successSub.textContent = sub;
+      currentNextAction = nextCallback;
+      successOverlay.classList.add('show');
+      voice.speak(`${title}！ ${sub}`);
+    }
+
+    /* ==========================================================
+       ゲーム1: きもち ど〜れだ？（表情と感情の理解）
+       ========================================================== */
+    const emotionData = [
+      {
+        question: "「うれしい」かおは どれかな？",
+        target: "うれしい",
+        options: [
+          { emoji: "😊", label: "うれしい", correct: true },
+          { emoji: "😢", label: "かなしい", correct: false },
+          { emoji: "😡", label: "おこる", correct: false },
+          { emoji: "😴", label: "ねむい", correct: false }
+        ]
+      },
+      {
+        question: "「かなしい」かおは どれかな？",
+        target: "かなしい",
+        options: [
+          { emoji: "😢", label: "かなしい", correct: true },
+          { emoji: "😊", label: "うれしい", correct: false },
+          { emoji: "😲", label: "びっくり", correct: false },
+          { emoji: "😋", label: "おいしい", correct: false }
+        ]
+      },
+      {
+        question: "「おこっている」かおは どれかな？",
+        target: "おこる",
+        options: [
+          { emoji: "😡", label: "おこる", correct: true },
+          { emoji: "😊", label: "えがお", correct: false },
+          { emoji: "😢", label: "なみだ", correct: false },
+          { emoji: "😴", label: "ねむい", correct: false }
+        ]
+      },
+      {
+        question: "「びっくり」している かおは どれかな？",
+        target: "びっくり",
+        options: [
+          { emoji: "😲", label: "びっくり", correct: true },
+          { emoji: "😊", label: "にこにこ", correct: false },
+          { emoji: "😋", label: "おいしい", correct: false },
+          { emoji: "😡", label: "ぷんぷん", correct: false }
+        ]
+      },
+      {
+        question: "「にこにこ おいしい」かおは どれかな？",
+        target: "おいしい",
+        options: [
+          { emoji: "😋", label: "おいしい", correct: true },
+          { emoji: "😢", label: "かなしい", correct: false },
+          { emoji: "😲", label: "びっくり", correct: false },
+          { emoji: "😴", label: "ねむい", correct: false }
+        ]
+      }
+    ];
+
+    let currentEmotionIndex = 0;
+
+    function initEmotionGame() {
+      // ランダムに出題
+      const q = emotionData[Math.floor(Math.random() * emotionData.length)];
+      setPrompt("きもち", q.question);
+
+      // 選択肢シャッフル
+      const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+
+      const container = document.createElement('div');
+      container.className = 'cards-grid cols-4';
+
+      shuffledOptions.forEach(opt => {
+        const card = document.createElement('button');
+        card.className = 'choice-card';
+        card.innerHTML = `
+          <span class="card-emoji">${opt.emoji}</span>
+          <span class="card-text">${opt.label}</span>
+        `;
+
+        card.addEventListener('click', () => {
+          sound.init();
+          if (opt.correct) {
+            sound.playCorrect();
+            card.classList.add('correct-anim');
+            setTimeout(() => {
+              showSuccess("せいかい！", "きもちが よくわかったね！", () => {
+                initEmotionGame();
+              });
+            }, 500);
+          } else {
+            sound.playTryAgain();
+            card.classList.add('wrong-anim');
+            voice.speak("もういっかい えらんでみよう");
+            setTimeout(() => card.classList.remove('wrong-anim'), 600);
+          }
+        });
+
+        container.appendChild(card);
+      });
+
+      gameContent.innerHTML = '';
+      gameContent.appendChild(container);
+    }
+
+    /* ==========================================================
+       ゲーム2: なかまわけ クイズ（環境の把握・概念理解）
+       ========================================================== */
+    const categoryQuestions = [
+      {
+        prompt: "「たべもの」は どれかな？",
+        options: [
+          { emoji: "🍎", label: "りんご", correct: true },
+          { emoji: "🚗", label: "くるま", correct: false },
+          { emoji: "✂️", label: "はさみ", correct: false },
+          { emoji: "🐶", label: "いぬ", correct: false }
+        ]
+      },
+      {
+        prompt: "「のりもの」は どれかな？",
+        options: [
+          { emoji: "🚅", label: "しんかんせん", correct: true },
+          { emoji: "🍌", label: "バナナ", correct: false },
+          { emoji: "✏️", label: "えんぴつ", correct: false },
+          { emoji: "🐱", label: "ねこ", correct: false }
+        ]
+      },
+      {
+        prompt: "「どうぐ（ぶんぼうぐ）」は どれかな？",
+        options: [
+          { emoji: "✂️", label: "はさみ", correct: true },
+          { emoji: "🍞", label: "パン", correct: false },
+          { emoji: "✈️", label: "ひこうき", correct: false },
+          { emoji: "🐘", label: "ぞう", correct: false }
+        ]
+      },
+      {
+        prompt: "「どうぶつ」は どれかな？",
+        options: [
+          { emoji: "🐼", label: "パンダ", correct: true },
+          { emoji: "🍙", label: "おにぎり", correct: false },
+          { emoji: "🚢", label: "ふね", correct: false },
+          { emoji: "📒", label: "ノート", correct: false }
+        ]
+      },
+      {
+        prompt: "「あまい くだもの」は どれかな？",
+        options: [
+          { emoji: "🍓", label: "いちご", correct: true },
+          { emoji: "🚲", label: "じてんしゃ", correct: false },
+          { emoji: "📏", label: "ものさし", correct: false },
+          { emoji: "⚽", label: "ボール", correct: false }
+        ]
+      }
+    ];
+
+    function initCategoryGame() {
+      const q = categoryQuestions[Math.floor(Math.random() * categoryQuestions.length)];
+      setPrompt("なかまわけ", q.prompt);
+
+      const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+      const container = document.createElement('div');
+      container.className = 'cards-grid cols-4';
+
+      shuffled.forEach(opt => {
+        const card = document.createElement('button');
+        card.className = 'choice-card';
+        card.innerHTML = `
+          <span class="card-emoji">${opt.emoji}</span>
+          <span class="card-text">${opt.label}</span>
+        `;
+
+        card.addEventListener('click', () => {
+          sound.init();
+          if (opt.correct) {
+            sound.playCorrect();
+            card.classList.add('correct-anim');
+            setTimeout(() => {
+              showSuccess("あたり！", "なかまを みつけられたね！", () => {
+                initCategoryGame();
+              });
+            }, 500);
+          } else {
+            sound.playTryAgain();
+            card.classList.add('wrong-anim');
+            voice.speak("ちがうなかまかな？ もういっかい！");
+            setTimeout(() => card.classList.remove('wrong-anim'), 600);
+          }
+        });
+
+        container.appendChild(card);
+      });
+
+      gameContent.innerHTML = '';
+      gameContent.appendChild(container);
+    }
+
+    /* ==========================================================
+       ゲーム3: ゆっくりタッチ（目と手の協応・ゆびの動き）
+       ========================================================== */
+    let balloonTimer = null;
+    let balloonCount = 0;
+    const TARGET_BALLOONS = 5;
+    let balloonSpeed = 1.0; // 1: ゆっくり, 2: ふつう
+
+    const balloonEmojis = ["🎈", "⭐", "🫧", "🌸", "🍎", "🐤", "✨"];
+
+    function initBalloonGame() {
+      setPrompt("タッチ", "ふわふわ うかぶものを タッチしてみよう！");
+      balloonCount = 0;
+
+      const stage = document.createElement('div');
+      stage.className = 'balloon-stage';
+      stage.id = 'balloonStage';
+
+      // カウンター
+      const counter = document.createElement('div');
+      counter.className = 'balloon-counter';
+      counter.id = 'balloonCount';
+      counter.textContent = `タッチしたかず: 0 / ${TARGET_BALLOONS}`;
+      stage.appendChild(counter);
+
+      // スピード切り替え
+      const speedSel = document.createElement('div');
+      speedSel.className = 'speed-selector';
+      speedSel.innerHTML = `
+        <button class="btn-speed ${balloonSpeed === 0.7 ? 'active' : ''}" id="btnSpeedSlow">ゆっくり</button>
+        <button class="btn-speed ${balloonSpeed === 1.4 ? 'active' : ''}" id="btnSpeedNormal">ふつう</button>
+      `;
+      stage.appendChild(speedSel);
+
+      gameContent.innerHTML = '';
+      gameContent.appendChild(stage);
+
+      document.getElementById('btnSpeedSlow').addEventListener('click', (e) => {
+        balloonSpeed = 0.7;
+        updateSpeedButtons();
+      });
+      document.getElementById('btnSpeedNormal').addEventListener('click', (e) => {
+        balloonSpeed = 1.4;
+        updateSpeedButtons();
+      });
+
+      function updateSpeedButtons() {
+        document.getElementById('btnSpeedSlow').classList.toggle('active', balloonSpeed === 0.7);
+        document.getElementById('btnSpeedNormal').classList.toggle('active', balloonSpeed === 1.4);
+      }
+
+      spawnBalloons(stage);
+    }
+
+    function spawnBalloons(stage) {
+      if (balloonTimer) clearInterval(balloonTimer);
+
+      const items = [];
+      const createItem = () => {
+        if (!document.getElementById('balloonStage')) return;
+        const elem = document.createElement('div');
+        elem.className = 'floating-item';
+
+        const emoji = balloonEmojis[Math.floor(Math.random() * balloonEmojis.length)];
+        elem.innerHTML = `<div class="floating-item-inner">${emoji}</div>`;
+
+        const stageW = stage.clientWidth || 600;
+        const stageH = stage.clientHeight || 360;
+
+        let posX = Math.random() * (stageW - 100) + 10;
+        let posY = stageH - 90;
+        let velX = (Math.random() - 0.5) * 1.5 * balloonSpeed;
+        let velY = -(Math.random() * 1.2 + 0.8) * balloonSpeed;
+
+        elem.style.transform = `translate(${posX}px, ${posY}px)`;
+        stage.appendChild(elem);
+
+        const itemObj = { elem, posX, posY, velX, velY, alive: true };
+        items.push(itemObj);
+
+        elem.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          if (!itemObj.alive) return;
+          itemObj.alive = false;
+          sound.playPop();
+
+          elem.style.transform = `translate(${itemObj.posX}px, ${itemObj.posY}px) scale(1.4)`;
+          elem.style.opacity = '0';
+          elem.style.transition = 'all 0.25s ease-out';
+
+          balloonCount++;
+          const counterElem = document.getElementById('balloonCount');
+          if (counterElem) counterElem.textContent = `タッチしたかず: ${balloonCount} / ${TARGET_BALLOONS}`;
+
+          setTimeout(() => {
+            if (elem.parentElement) elem.parentElement.removeChild(elem);
+          }, 250);
+
+          if (balloonCount >= TARGET_BALLOONS) {
+            clearInterval(balloonTimer);
+            setTimeout(() => {
+              showSuccess("パーフェクト！", "たくさん タッチできたね！", () => {
+                initBalloonGame();
+              });
+            }, 400);
+          }
+        });
+      };
+
+      // 最初に3つ生成
+      for (let i = 0; i < 3; i++) {
+        setTimeout(createItem, i * 800);
+      }
+
+      balloonTimer = setInterval(() => {
+        const stageW = stage.clientWidth || 600;
+        const stageH = stage.clientHeight || 360;
+
+        // 浮遊更新
+        for (let i = items.length - 1; i >= 0; i--) {
+          const item = items[i];
+          if (!item.alive) {
+            items.splice(i, 1);
+            continue;
+          }
+          item.posX += item.velX;
+          item.posY += item.velY;
+
+          // 画面外に出たら再利用
+          if (item.posY < -100 || item.posX < -50 || item.posX > stageW + 50) {
+            if (item.elem.parentElement) item.elem.parentElement.removeChild(item.elem);
+            items.splice(i, 1);
+          } else {
+            item.elem.style.transform = `translate(${item.posX}px, ${item.posY}px)`;
+          }
+        }
+
+        // 画面内のアイテムが少なくなったら補充
+        if (items.length < 3 && balloonCount < TARGET_BALLOONS) {
+          createItem();
+        }
+      }, 30);
+    }
+
+    /* ==========================================================
+       ゲーム4: じゅんばんタッチ 1・2・3（見通し・系列）
+       ========================================================== */
+    let currentStep = 1;
+    const MAX_STEP = 3;
+
+    function initSequenceGame() {
+      currentStep = 1;
+      setPrompt("じゅんばん", "「１」から じゅんばんに タッチしよう！");
+
+      const stage = document.createElement('div');
+      stage.className = 'sequence-stage';
+      stage.id = 'sequenceStage';
+
+      // 1, 2, 3 の位置を計算（重ならないように配置）
+      const positions = [
+        { x: 20, y: 35 },
+        { x: 50, y: 25 },
+        { x: 75, y: 45 }
+      ].sort(() => Math.random() - 0.5);
+
+      for (let i = 1; i <= MAX_STEP; i++) {
+        const node = document.createElement('button');
+        node.className = 'seq-node';
+        node.id = `seqNode-${i}`;
+        node.textContent = i;
+
+        // 位置のランダム揺らぎ
+        const pos = positions[i - 1];
+        node.style.left = `calc(${pos.x}% - 45px)`;
+        node.style.top = `calc(${pos.y}% - 45px)`;
+
+        if (i === 1 && hintEnabled) {
+          node.classList.add('hint-next');
+        }
+
+        node.addEventListener('click', () => {
+          sound.init();
+          if (i === currentStep) {
+            sound.playStep();
+            node.classList.remove('hint-next');
+            node.classList.add('cleared');
+            currentStep++;
+
+            if (currentStep <= MAX_STEP) {
+              voice.speak(`つぎは ${currentStep}！`);
+              setPrompt("じゅんばん", `つぎは 「${currentStep}」を タッチしてね！`);
+              const nextNode = document.getElementById(`seqNode-${currentStep}`);
+              if (nextNode && hintEnabled) {
+                nextNode.classList.add('hint-next');
+              }
+            } else {
+              setTimeout(() => {
+                showSuccess("かんせい！", "１・２・３ じゅんばんに タッチできたね！", () => {
+                  initSequenceGame();
+                });
+              }, 400);
+            }
+          } else {
+            sound.playTryAgain();
+            voice.speak(`つぎは ${currentStep} だよ`);
+          }
+        });
+
+        stage.appendChild(node);
+      }
+
+      gameContent.innerHTML = '';
+      gameContent.appendChild(stage);
+    }
+
+    /* ==========================================================
+       共通コントローラー・設定モーダル
+       ========================================================== */
+    function startCurrentGame() {
+      if (balloonTimer) clearInterval(balloonTimer);
+      if (currentGameMode === 'emotion') {
+        initEmotionGame();
+      } else if (currentGameMode === 'category') {
+        initCategoryGame();
+      } else if (currentGameMode === 'balloon') {
+        initBalloonGame();
+      } else if (currentGameMode === 'sequence') {
+        initSequenceGame();
+      }
+    }
+
+    // 設定モーダルの開閉
+    const settingsModal = document.getElementById('settingsModal');
+    document.getElementById('btnSettings').addEventListener('click', () => {
+      settingsModal.classList.add('open');
+    });
+    document.getElementById('btnCloseSettings').addEventListener('click', () => {
+      settingsModal.classList.remove('open');
+    });
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) {
+        settingsModal.classList.remove('open');
+      }
+    });
+
+    // 設定スイッチ連動
+    document.getElementById('toggleSound').addEventListener('change', (e) => {
+      sound.enabled = e.target.checked;
+    });
+    document.getElementById('toggleVoice').addEventListener('change', (e) => {
+      voice.enabled = e.target.checked;
+    });
+    document.getElementById('toggleHint').addEventListener('change', (e) => {
+      hintEnabled = e.target.checked;
+      const currentHint = document.getElementById(`seqNode-${currentStep}`);
+      if (currentHint) {
+        currentHint.classList.toggle('hint-next', hintEnabled);
+      }
+    });
+
+    // 全画面表示ボタン
+    document.getElementById('btnFullscreen').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.warn(err);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    });
+
+    // 初期化実行
+    window.addEventListener('DOMContentLoaded', () => {
+      startCurrentGame();
+    });
+  </script>
+</body>
+</html>
